@@ -2,30 +2,42 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	_ "github.com/lib/pq"
 	"net/http"
+	"strconv"
 )
 
-func sayHello(name string) http.HandlerFunc {
-	helloPhrase := fmt.Sprintf("Hello, %v!", name)
+const (
+	usersRoute = "/users/"
+)
 
+func serveUsers(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, helloPhrase)
+		id, err := strconv.Atoi(r.URL.Path[len(usersRoute):])
+		if err != nil {
+			http.Error(w, "Couldn't parse ID from users path.", http.StatusBadRequest)
+			return
+		}
+
+		var name string
+		err = db.QueryRow("SELECT u.name FROM users u WHERE u.id = $1", id).Scan(&name)
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+
+		w.Write([]byte(name))
 	}
 }
 
 func main() {
 	db, err := sql.Open("postgres", "dbname=fido-research sslmode=disable")
 	if err != nil {
-		fmt.Println(err.Error())
+		panic(err)
 	}
 
 	defer db.Close()
 
-	var name string
-	db.QueryRow("SELECT name FROM users").Scan(&name)
-
-	http.HandleFunc("/", sayHello(name))
+	http.HandleFunc(usersRoute, serveUsers(db))
 	http.ListenAndServe(":4646", nil)
 }
