@@ -21,8 +21,12 @@ func serveUsers(db *sql.DB) http.HandlerFunc {
 
 		var name string
 		err = db.QueryRow("SELECT u.name FROM users u WHERE u.id = $1", id).Scan(&name)
-		if err != nil {
+		switch {
+		case err == sql.ErrNoRows:
 			http.NotFound(w, r)
+			return
+		case err != nil:
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
