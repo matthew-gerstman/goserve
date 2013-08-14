@@ -57,14 +57,6 @@ func servePostUser(db *sql.DB) http.HandlerFunc {
 	}
 }
 
-func servePutUser(db *sql.DB) http.HandlerFunc {
-	return http.NotFound
-}
-
-func servePatchUser(db *sql.DB) http.HandlerFunc {
-	return http.NotFound
-}
-
 func serveDeleteUser(db *sql.DB) http.HandlerFunc {
 	return http.NotFound
 }
