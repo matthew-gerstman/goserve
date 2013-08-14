@@ -8,16 +8,12 @@ import (
 )
 
 const (
-	usersRoute = "/users/"
+	usersPath = "/users/"
 )
-
-func serveGetUsers(db *sql.DB) http.HandlerFunc {
-	return http.NotFound
-}
 
 func serveGetUser(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		id, err := strconv.Atoi(r.URL.Path[len(usersRoute):])
+		id, err := strconv.Atoi(r.URL.Path[len(usersPath):])
 		if err != nil {
 			http.Error(w, "Couldn't parse ID from users path.", http.StatusBadRequest)
 			return
@@ -80,10 +76,6 @@ func serveUsers(db *sql.DB) http.HandlerFunc {
 			serveGetUser(db)(w, r)
 		case "POST":
 			servePostUser(db)(w, r)
-		case "PUT":
-			servePutUser(db)(w, r)
-		case "PATCH":
-			servePatchUser(db)(w, r)
 		case "DELETE":
 			serveDeleteUser(db)(w, r)
 		default:
@@ -99,6 +91,6 @@ func main() {
 
 	defer db.Close()
 
-	http.HandleFunc(usersRoute, serveUsers(db))
+	http.HandleFunc(usersPath, serveUsers(db))
 	http.ListenAndServe(":4646", nil)
 }
