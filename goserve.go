@@ -39,7 +39,26 @@ func serveGetUser(db *sql.DB) http.HandlerFunc {
 }
 
 func servePostUser(db *sql.DB) http.HandlerFunc {
-	return http.NotFound
+	return func(w http.ResponseWriter, r *http.Request) {
+		queryValues := r.URL.Query()
+		name, ok := queryValues["name"]
+		if !ok {
+			http.Error(w, "Name to add must be URL encoded in POST request", http.StatusBadRequest)
+			return
+		}
+
+		if len(name) != 1 {
+			http.Error(w, "Only one name may be added at a time.", http.StatusBadRequest)
+			return
+		}
+
+		_, err := db.Exec("INSERT INTO users (name) VALUES ($1)", name[0])
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+
+		w.WriteHeader(http.StatusOK)
+	}
 }
 
 func servePutUser(db *sql.DB) http.HandlerFunc {
