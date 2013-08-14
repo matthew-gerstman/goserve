@@ -59,7 +59,21 @@ func servePostUser(db *sql.DB) http.HandlerFunc {
 }
 
 func serveDeleteUser(db *sql.DB) http.HandlerFunc {
-	return http.NotFound
+	return func(w http.ResponseWriter, r *http.Request) {
+		id, err := strconv.Atoi(r.URL.Path[len(usersPath):])
+		if err != nil {
+			http.Error(w, "Couldn't parse ID from users path.", http.StatusBadRequest)
+			return
+		}
+
+		_, err = db.Exec("DELETE FROM users u WHERE u.id = $1", id)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+	}
 }
 
 func serveUsers(db *sql.DB) http.HandlerFunc {
