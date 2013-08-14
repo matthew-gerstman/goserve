@@ -11,7 +11,11 @@ const (
 	usersRoute = "/users/"
 )
 
-func serveUsers(db *sql.DB) http.HandlerFunc {
+func serveGetUsers(db *sql.DB) http.HandlerFunc {
+	return http.NotFound
+}
+
+func serveGetUser(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(r.URL.Path[len(usersRoute):])
 		if err != nil {
@@ -31,6 +35,40 @@ func serveUsers(db *sql.DB) http.HandlerFunc {
 		}
 
 		w.Write([]byte(name))
+	}
+}
+
+func servePostUser(db *sql.DB) http.HandlerFunc {
+	return http.NotFound
+}
+
+func servePutUser(db *sql.DB) http.HandlerFunc {
+	return http.NotFound
+}
+
+func servePatchUser(db *sql.DB) http.HandlerFunc {
+	return http.NotFound
+}
+
+func serveDeleteUser(db *sql.DB) http.HandlerFunc {
+	return http.NotFound
+}
+
+func serveUsers(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case "GET":
+			serveGetUser(db)(w, r)
+		case "POST":
+			servePostUser(db)(w, r)
+		case "PUT":
+			servePutUser(db)(w, r)
+		case "PATCH":
+			servePatchUser(db)(w, r)
+		case "DELETE":
+			serveDeleteUser(db)(w, r)
+		default:
+		}
 	}
 }
 
