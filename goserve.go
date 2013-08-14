@@ -66,9 +66,18 @@ func serveDeleteUser(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		_, err = db.Exec("DELETE FROM users u WHERE u.id = $1", id)
+		res, err := db.Exec("DELETE FROM users u WHERE u.id = $1", id)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		rowsAffected, err := res.RowsAffected()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		if rowsAffected == 0 {
+			http.NotFound(w, r)
 			return
 		}
 
