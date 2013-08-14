@@ -51,6 +51,7 @@ func servePostUser(db *sql.DB) http.HandlerFunc {
 		_, err := db.Exec("INSERT INTO users (name) VALUES ($1)", name[0])
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 
 		w.WriteHeader(http.StatusOK)
